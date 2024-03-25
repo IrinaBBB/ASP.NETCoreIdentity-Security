@@ -41,3 +41,7 @@ bld/
 msbuild.log
 msbuild.err
 msbuild.wrn
+
+IdentityNetCore/IdentityNetCore/Blog.db-shm
+
+IdentityNetCore/IdentityNetCore/Blog.db-wal
