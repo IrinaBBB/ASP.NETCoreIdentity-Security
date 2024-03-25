@@ -23,7 +23,12 @@ builder.Services.Configure<IdentityOptions>(options =>
     options.SignIn.RequireConfirmedEmail = true;
 });
 
-
+builder.Services.ConfigureApplicationCookie(options => 
+{
+    options.LoginPath = "/Home/SignIn";
+    options.AccessDeniedPath = "/Home/AccessDenied";
+    options.ExpireTimeSpan = TimeSpan.FromHours(24);
+});
 
 var app = builder.Build();
 
