@@ -1,0 +1,37 @@
+﻿@{
+    ViewData["Title"] = "Signup Page";
+}
+
+@model IdentityNetCore.Models.SignupViewModel
+
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <form method="post" class="p-4 p-md-5 border rounded-3 bg-light shadow-sm">
+                <div asp-validation-summary="All" class="text-danger"></div>
+
+                <h2 class="mb-4 text-center display-4">Create an Account</h2>
+                <div class="mb-3">
+                    <label asp-for="Email" class="form-label">Email Address</label>
+                    <input asp-for="Email" class="form-control" placeholder="Enter your email" required>
+                    <span asp-validation-for="Email" class="text-danger"></span>
+                </div>
+                <div class="mb-3">
+                    <label asp-for="Password" class="form-label">Password</label>
+                    <input asp-for="Password" class="form-control" placeholder="Enter your password" required>
+                    <span asp-validation-for="Password" class="text-danger"></span>
+                </div>
+                <div class="d-grid mt-3">
+                    <button type="submit" class="btn btn-primary btn-block">Sign Up</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+
+@section Scripts {
+    @{
+        <partial name="_ValidationScriptsPartial" />
+    }
+}
