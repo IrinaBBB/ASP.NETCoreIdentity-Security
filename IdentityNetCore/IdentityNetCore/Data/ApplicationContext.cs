@@ -8,11 +8,11 @@ namespace IdentityNetCore.Data
     {
         public ApplicationContext()
         {
-            
+
         }
         public ApplicationContext(DbContextOptions options) : base(options)
         {
-            
+
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -23,7 +23,7 @@ namespace IdentityNetCore.Data
 
             modelBuilder.Entity<Post>()
                 .Property(p => p.CreatedAt)
-                .HasDefaultValueSql("datetime('now')"); 
+                .HasDefaultValueSql("datetime('now')");
         }
 
         public DbSet<Post> Posts { get; set; }

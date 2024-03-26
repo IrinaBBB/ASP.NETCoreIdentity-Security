@@ -1,4 +1,5 @@
 using IdentityNetCore.Data;
+using IdentityNetCore.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
@@ -10,9 +11,10 @@ builder.Services.AddDbContext<ApplicationContext>(opt =>
 {
     opt.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection"));
 });
-builder.Services.AddIdentity<IdentityUser, IdentityRole>().AddEntityFrameworkStores<ApplicationContext>();
+builder.Services.AddIdentity<IdentityUser, IdentityRole>().AddEntityFrameworkStores<ApplicationContext>().AddDefaultTokenProviders();
 builder.Services.Configure<IdentityOptions>(options =>
 {
+
     options.Password.RequiredLength = 6;
     options.Password.RequireDigit = true;
     options.Password.RequireNonAlphanumeric = true;
@@ -20,16 +22,18 @@ builder.Services.Configure<IdentityOptions>(options =>
     options.Lockout.MaxFailedAccessAttempts = 5;
     options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(5);
 
+    options.SignIn.RequireConfirmedAccount = true;
     options.SignIn.RequireConfirmedEmail = true;
 });
 
-builder.Services.ConfigureApplicationCookie(options => 
+builder.Services.ConfigureApplicationCookie(options =>
 {
     options.LoginPath = "/Home/SignIn";
     options.AccessDeniedPath = "/Home/AccessDenied";
     options.ExpireTimeSpan = TimeSpan.FromHours(24);
 });
 
+builder.Services.AddSingleton<IEmailSender, MailJetEmailSender>();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
