@@ -9,11 +9,13 @@ namespace IdentityNetCore.Controllers
     {
         private readonly UserManager<IdentityUser> _userManager;
         private readonly IEmailSender _emailSender;
+        private readonly SignInManager<IdentityUser> _signInManager;
 
-        public IdentityController(UserManager<IdentityUser> userManager, IEmailSender emailSender)
+        public IdentityController(UserManager<IdentityUser> userManager, IEmailSender emailSender, SignInManager<IdentityUser> signInManager)
         {
             _userManager = userManager;
             _emailSender = emailSender;
+            _signInManager = signInManager;
         }
         public IActionResult Signup()
         {
@@ -66,12 +68,33 @@ namespace IdentityNetCore.Controllers
             return new NotFoundResult();
         }
 
-        public async Task<IActionResult> Signin()
+        public IActionResult Signin()
         {
-            return View();
+            
+            return View(new SigninViewModel());
         }
 
-        public async Task<IActionResult> AccessDenied()
+        [HttpPost]
+        public async Task<IActionResult> Signin(SigninViewModel model)
+        {
+            if (ModelState.IsValid)
+            {
+                var result = await _signInManager.PasswordSignInAsync(model.Email, model.Password, model.RemeberMe, false);
+                if (result.Succeeded)
+                {
+                    return RedirectToAction("Index", "Home");
+                } else
+                {
+                    ModelState.AddModelError("Login", "Cannot login");
+                    return View(model);
+                }
+            } else
+            {
+                return View(model);
+            }
+        }
+
+        public IActionResult AccessDenied()
         {
             return View();
         }
