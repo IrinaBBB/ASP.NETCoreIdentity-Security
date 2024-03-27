@@ -28,8 +28,8 @@ builder.Services.Configure<IdentityOptions>(options =>
 
 builder.Services.ConfigureApplicationCookie(options =>
 {
-    options.LoginPath = "/Home/SignIn";
-    options.AccessDeniedPath = "/Home/AccessDenied";
+    options.LoginPath = "/Identity/Signin";
+    options.AccessDeniedPath = "/Identity/AccessDenied";
     options.ExpireTimeSpan = TimeSpan.FromHours(24);
 });
 

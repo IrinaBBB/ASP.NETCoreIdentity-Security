@@ -1,5 +1,6 @@
 using IdentityNetCore.Data;
 using IdentityNetCore.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
 
@@ -22,6 +23,19 @@ namespace IdentityNetCore.Controllers
             return View(posts);
         }
 
+        [Authorize(Roles = "Member")]
+        public IActionResult Member()
+        {
+            return View();
+        }
+
+        [Authorize(Roles = "Admin")]
+        public IActionResult Admin()
+        {
+            return View();
+        }
+
+        [Authorize]
         public IActionResult Privacy()
         {
             return View();

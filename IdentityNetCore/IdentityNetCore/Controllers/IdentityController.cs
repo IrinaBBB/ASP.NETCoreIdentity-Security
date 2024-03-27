@@ -10,16 +10,19 @@ namespace IdentityNetCore.Controllers
         private readonly UserManager<IdentityUser> _userManager;
         private readonly IEmailSender _emailSender;
         private readonly SignInManager<IdentityUser> _signInManager;
+        private readonly RoleManager<IdentityRole> _roleManager;
 
-        public IdentityController(UserManager<IdentityUser> userManager, IEmailSender emailSender, SignInManager<IdentityUser> signInManager)
+        public IdentityController(UserManager<IdentityUser> userManager, IEmailSender emailSender, 
+            SignInManager<IdentityUser> signInManager, RoleManager<IdentityRole> roleManager)
         {
             _userManager = userManager;
             _emailSender = emailSender;
             _signInManager = signInManager;
+            _roleManager = roleManager;
         }
         public IActionResult Signup()
         {
-            var model = new SignupViewModel();
+            var model = new SignupViewModel() { Role = "Member" };
             return View(model);
         }
 
@@ -28,6 +31,16 @@ namespace IdentityNetCore.Controllers
         {
             if (ModelState.IsValid)
             {
+                if (!(await _roleManager.RoleExistsAsync(model.Role)))
+                {
+                    var roleResult = await _roleManager.CreateAsync(new IdentityRole { Name = model.Role });
+                    if (!roleResult.Succeeded)
+                    {
+                        var errors = roleResult.Errors.Select(s => s.Description);
+                        ModelState.AddModelError("Role", string.Join(",", errors));
+                        return View(model);
+                    }
+                }
                 if ((await _userManager.FindByEmailAsync(model.Email)) == null)
                 {
                     var user = new IdentityUser
@@ -41,6 +54,7 @@ namespace IdentityNetCore.Controllers
                     var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
                     if (result.Succeeded)
                     {
+                        await _userManager.AddToRoleAsync(user, model.Role);
                         var confirmationLink =  Url.ActionLink("ConfirmEmail", "Identity", new
                         {
                             userId = user.Id,
@@ -82,6 +96,18 @@ namespace IdentityNetCore.Controllers
                 var result = await _signInManager.PasswordSignInAsync(model.Email, model.Password, model.RemeberMe, false);
                 if (result.Succeeded)
                 {
+                    var userName = HttpContext.User.Identity.Name;
+                    var user = await _userManager.FindByEmailAsync(userName);
+                    if (await _userManager.IsInRoleAsync(user, "Member"))
+                    {
+                        return RedirectToAction("Member", "Home");
+                    }
+
+                    if (await _userManager.IsInRoleAsync(user, "Admin"))
+                    {
+                        return RedirectToAction("Admin", "Home");
+                    }
+
                     return RedirectToAction("Index", "Home");
                 } else
                 {
