@@ -29,6 +29,11 @@
                     </select>
                     <span asp-validation-for="Role" class="text-danger"></span>
                 </div>
+                <div class="mb-3">
+                    <label asp-for="Department" class="form-label">Department</label>
+                    <input asp-for="Department" class="form-control" placeholder="Enter your department" required>
+                    <span asp-validation-for="Department" class="text-danger"></span>
+                </div>
                 <div class="d-grid mt-3">
                     <button type="submit" class="btn btn-primary btn-block">Sign Up</button>
                 </div>

@@ -2,6 +2,7 @@
 using IdentityNetCore.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace IdentityNetCore.Controllers
 {
@@ -54,6 +55,8 @@ namespace IdentityNetCore.Controllers
                     var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
                     if (result.Succeeded)
                     {
+                        var claim = new Claim("Department", model.Department);
+                        await _userManager.AddClaimAsync(user, claim);
                         await _userManager.AddToRoleAsync(user, model.Role);
                         var confirmationLink =  Url.ActionLink("ConfirmEmail", "Identity", new
                         {
@@ -98,6 +101,14 @@ namespace IdentityNetCore.Controllers
                 {
                     var userName = HttpContext.User.Identity.Name;
                     var user = await _userManager.FindByEmailAsync(userName);
+                    var userClaims = await _userManager.GetClaimsAsync(user);
+
+                    if (!userClaims.Any(x => x.Type == "Department"))
+                    {
+                        ModelState.AddModelError("Claim", "User not in the right department");
+                        return View(model);
+                    }
+
                     if (await _userManager.IsInRoleAsync(user, "Member"))
                     {
                         return RedirectToAction("Member", "Home");
