@@ -36,6 +36,7 @@ namespace IdentityNetCore.Controllers
         }
 
         [Authorize]
+        [Authorize(Policy = "Department")]
         public IActionResult Privacy()
         {
             return View();

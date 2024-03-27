@@ -101,13 +101,13 @@ namespace IdentityNetCore.Controllers
                 {
                     var userName = HttpContext.User.Identity.Name;
                     var user = await _userManager.FindByEmailAsync(userName);
-                    var userClaims = await _userManager.GetClaimsAsync(user);
+                    //var userClaims = await _userManager.GetClaimsAsync(user);
 
-                    if (!userClaims.Any(x => x.Type == "Department"))
-                    {
-                        ModelState.AddModelError("Claim", "User not in the right department");
-                        return View(model);
-                    }
+                    //if (!userClaims.Any(x => x.Type == "Department"))
+                    //{
+                    //    ModelState.AddModelError("Claim", "User not in the right department");
+                    //    return View(model);
+                    //}
 
                     if (await _userManager.IsInRoleAsync(user, "Member"))
                     {

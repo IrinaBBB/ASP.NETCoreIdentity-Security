@@ -34,6 +34,13 @@ builder.Services.ConfigureApplicationCookie(options =>
 });
 
 builder.Services.AddSingleton<IEmailSender, MailJetEmailSender>();
+builder.Services.AddAuthorization(option =>
+{
+    option.AddPolicy("Department", p =>
+    {
+        p.RequireClaim("Department", "Production").RequireRole("Admin");
+    });
+});
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -49,6 +56,7 @@ app.UseStaticFiles();
 
 app.UseRouting();
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllerRoute(
