@@ -1,5 +1,7 @@
 using IdentityNetCore.Data;
 using IdentityNetCore.Services;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication.Facebook;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
@@ -33,6 +35,12 @@ builder.Services.ConfigureApplicationCookie(options =>
     options.ExpireTimeSpan = TimeSpan.FromHours(24);
 });
 
+builder.Services.AddAuthentication().AddFacebook(opt =>
+{
+    opt.AppId = builder.Configuration["FacebookLogInAppID"];
+    opt.AppSecret = builder.Configuration["FacebookLogInAppSecret"];
+});
+
 builder.Services.AddSingleton<IEmailSender, MailJetEmailSender>();
 builder.Services.AddAuthorization(option =>
 {
@@ -41,6 +49,10 @@ builder.Services.AddAuthorization(option =>
         p.RequireClaim("Department", "Production").RequireRole("Admin");
     });
 });
+
+
+
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

@@ -9,6 +9,7 @@
 
   <ItemGroup>
     <PackageReference Include="Mailjet.Api" Version="1.2.3" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.Facebook" Version="8.0.3" />
     <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="8.0.3" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.3">
       <PrivateAssets>all</PrivateAssets>

@@ -2,6 +2,12 @@
     ViewData["Title"] = "Signin Page";
 }
 @model IdentityNetCore.Models.SigninViewModel
+@using Microsoft.AspNetCore.Identity
+@inject SignInManager<IdentityUser> signInManager
+
+@{
+    var providers = await signInManager.GetExternalAuthenticationSchemesAsync(); 
+}
 
 <div class="container">
     <div class="row justify-content-center">
@@ -31,6 +37,17 @@
     </div>
 </div>
 
+<p>
+    You can use your social media account to login as well:
+</p>
+<form asp-action="ExternalLogin" method="post">
+    <div class="form-group">
+        @foreach (var provider in providers)
+        {
+            <button type="submit" name="provider" value="@provider.Name" class="btn btn-dark">@provider.DisplayName</button>
+        }
+    </div>
+</form>
 @section Scripts {
     @{
         <partial name="_ValidationScriptsPartial" />

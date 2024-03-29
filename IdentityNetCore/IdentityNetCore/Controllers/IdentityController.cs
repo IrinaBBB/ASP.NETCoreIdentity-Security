@@ -193,5 +193,48 @@ namespace IdentityNetCore.Controllers
             await _signInManager.SignOutAsync();
             return RedirectToAction("Signin", "Identity");
         }
+
+        [HttpPost]
+        public IActionResult ExternalLogin(string provider, string returnUrl = null)
+        {
+            var properties = _signInManager.ConfigureExternalAuthenticationProperties(provider, returnUrl);
+            var callBackUrl = Url.Action("ExternalLoginCallBack");
+            properties.RedirectUri = callBackUrl;
+            return Challenge(properties, provider);
+        }
+
+        //public async Task<IActionResult> ExternalLoginCallBack()
+        //{
+        //    var info = await _signInManager.GetExternalLoginInfoAsync();
+        //    var emailClaim = info.Principal.Claims.FirstOrDefault(x => x.Type == ClaimTypes.Email);
+        //    var user = new IdentityUser { Email = emailClaim.Value, UserName = emailClaim.Value };
+        //    await _userManager.CreateAsync(user);
+        //    await _userManager.AddLoginAsync(user, info);
+        //    await _signInManager.SignInAsync(user, false);
+        //    return RedirectToAction("Index", "Home");
+        //}
+
+        public async Task<IActionResult> ExternalLoginCallback()
+        {
+            var info = await _signInManager.GetExternalLoginInfoAsync();
+            var emailClaim = info.Principal.Claims.FirstOrDefault(x => x.Type == ClaimTypes.Email);
+
+            // Check if a user with the same email already exists
+            var existingUser = await _userManager.FindByEmailAsync(emailClaim.Value);
+            if (existingUser != null)
+            {
+                // If the user already exists, sign them in and redirect to home
+                await _signInManager.SignInAsync(existingUser, false);
+                return RedirectToAction("Index", "Home");
+            }
+
+            // Create a new user since no user with the same email exists
+            var user = new IdentityUser { Email = emailClaim.Value, UserName = emailClaim.Value };
+            await _userManager.CreateAsync(user);
+            await _userManager.AddLoginAsync(user, info);
+            await _signInManager.SignInAsync(user, false);
+            return RedirectToAction("Index", "Home");
+        }
+
     }
 }
