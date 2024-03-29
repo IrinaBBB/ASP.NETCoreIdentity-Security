@@ -1,7 +1,10 @@
 ﻿using IdentityNetCore.Models;
 using IdentityNetCore.Services;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using System.Security.Claims;
 
 namespace IdentityNetCore.Controllers
@@ -85,6 +88,37 @@ namespace IdentityNetCore.Controllers
             return new NotFoundResult();
         }
 
+        [Authorize]
+        public async Task<IActionResult> MFASetup()
+        {
+            const string provider = "aspnetidentity";
+            var user = await _userManager.GetUserAsync(User);
+            await _userManager.ResetAuthenticatorKeyAsync(user);
+            var token = await _userManager.GetAuthenticatorKeyAsync(user);
+            var qrCodeUrl = $"otpauth://totp/{provider}:{user.Email}?secret={token}&issuer={provider}&digits=6";
+
+            var model = new MFAViewModel { Token = token, QRCodeUrl = qrCodeUrl };
+            return View(model);
+        }
+
+        [HttpPost]
+        [Authorize]
+        public async Task<IActionResult> MFASetup(MFAViewModel model)
+        {
+            if (ModelState.IsValid)
+            {
+                var user = await _userManager.GetUserAsync(User);
+                var succeeded = await _userManager.VerifyTwoFactorTokenAsync(user,
+                    _userManager.Options.Tokens.AuthenticatorTokenProvider, model.Code);
+                if (succeeded)
+                    await _userManager.SetTwoFactorEnabledAsync(user, true);
+                else
+                    ModelState.AddModelError("Verify", "Your MFA code could not be validated.");
+            }
+
+            return View(model);
+        }
+
         public IActionResult Signin()
         {
             
@@ -97,6 +131,7 @@ namespace IdentityNetCore.Controllers
             if (ModelState.IsValid)
             {
                 var result = await _signInManager.PasswordSignInAsync(model.Email, model.Password, model.RemeberMe, false);
+                if (result.RequiresTwoFactor) return RedirectToAction("MFACheck");
                 if (result.Succeeded)
                 {
                     var userName = HttpContext.User.Identity.Name;
@@ -129,6 +164,23 @@ namespace IdentityNetCore.Controllers
             {
                 return View(model);
             }
+        }
+
+        public IActionResult MFACheck()
+        {
+            return View(new MNFACheckViewModel());
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> MFACheck(MNFACheckViewModel model)
+        {
+            if (ModelState.IsValid)
+            {
+                var result = await _signInManager.TwoFactorAuthenticatorSignInAsync(model.Code, false, false);
+                if (result.Succeeded) return RedirectToAction("Index", "Home", null);
+            }
+
+            return View(model);
         }
 
         public IActionResult AccessDenied()

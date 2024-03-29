@@ -1,0 +1,29 @@
+﻿@{
+    ViewData["Title"] = "MFA Setup Page";
+}
+@model MFAViewModel
+<div asp-validation-summary="All" class="text-danger"></div>
+<p>
+    Please enter the code below in your authenticator application.
+</p>
+<p>
+    @Model.Token
+</p>
+<p>Scan the code below:</p>
+<div id="qrcode"></div>
+<form asp-controller="Identity" asp-action="MFASetup" method="post">
+    <input type="hidden" asp-for="Token"/>
+    <div class="form-group">
+        Enter Code: <input type="text" class="form-control" asp-for="Code" />
+    </div>
+    <button type="submit" class="btn btn-primary">Submit</button>
+</form>
+
+
+@section Scripts 
+{
+    <script src="~/lib/qrcodejs/qrcode.js"></script>
+    <script type="text/javascript">
+        new QRCode(document.getElementById("qrcode"), "@Model.QRCodeUrl");
+    </script>
+}
